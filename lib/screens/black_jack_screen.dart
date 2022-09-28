@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class BlackJackScreen extends StatefulWidget {
@@ -90,9 +92,77 @@ class _BlackJackScreenState extends State<BlackJackScreen> {
     setState(() {
       isGameStarted = true;
     });
+
+    playingCards = {};
+
+    playingCards.addAll(deckOfCards);
+
+    myCards = [];
+    dealersCards = [];
+
+    Random random = Random();
+
+    String cardOneKey = playingCards.keys.elementAt(random.nextInt(
+        playingCards.length)); //from 1 to playingCards.length inclusive
+
+    // проверяет попадаются ли похожие карты и если да, то оно выдает тру и убирает её из колоды
+    playingCards.removeWhere((key, value) => key == cardOneKey);
+
+    String cardTwoKey =
+        playingCards.keys.elementAt(random.nextInt(playingCards.length));
+    playingCards.removeWhere((key, value) => key == cardTwoKey);
+
+    String cardThreeKey =
+        playingCards.keys.elementAt(random.nextInt(playingCards.length));
+    playingCards.removeWhere((key, value) => key == cardThreeKey);
+
+    String cardFourKey =
+        playingCards.keys.elementAt(random.nextInt(playingCards.length));
+    playingCards.removeWhere((key, value) => key == cardFourKey);
+
+    dealersFirstCard = cardOneKey;
+    dealersSecondCard = cardTwoKey;
+
+    playersFirstCard = cardThreeKey;
+    playersSecondCard = cardFourKey;
+
+    dealersCards.add(Image.asset(dealersFirstCard!));
+    dealersCards.add(Image.asset(dealersSecondCard!));
+
+    dealersScore =
+        deckOfCards[dealersFirstCard]! + deckOfCards[dealersSecondCard]!;
+
+    myCards.add(Image.asset(playersFirstCard!));
+    myCards.add(Image.asset(playersSecondCard!));
+    playerScore =
+        deckOfCards[playersFirstCard]! + deckOfCards[playersSecondCard]!;
+
+    if (dealersScore <= 14) {
+      String thirdDealersCardKey =
+          playingCards.keys.elementAt(random.nextInt(playingCards.length));
+      playingCards.removeWhere((key, value) => key == thirdDealersCardKey);
+
+      dealersCards.add(Image.asset(thirdDealersCardKey));
+
+      dealersScore = dealersScore + deckOfCards[thirdDealersCardKey]!;
+    }
   }
 
-  void addCard() {}
+  void addCard() {
+    Random random = Random();
+
+    if (playingCards.length > 0) {
+      String cardKey =
+          playingCards.keys.elementAt(random.nextInt(playingCards.length));
+      playingCards.removeWhere((key, value) => key == cardKey);
+
+      setState(() {
+        myCards.add(Image.asset(cardKey));
+      });
+
+      playerScore = playerScore + deckOfCards[cardKey]!;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,33 +176,97 @@ class _BlackJackScreenState extends State<BlackJackScreen> {
                       // dealer cards
                       Column(
                         children: [
-                          Text('Dealers Score $dealersScore'),
+                          Text(
+                            'Противника очки $dealersScore',
+                            style: TextStyle(
+                                fontSize: 22,
+                                color: dealersScore <= 21
+                                    ? Colors.green[700]
+                                    : Colors.red[900]),
+                          ),
                           SizedBox(
                             height: 20,
+                          ),
+                          // grid view
+                          Container(
+                            height: 200,
+                            child: GridView.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                              ),
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: dealersCards.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: dealersCards[index],
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),
                       //players Cards
                       Column(
                         children: [
-                          Text('Players Score $playerScore'),
+                          Text(
+                            'Витькины очки $playerScore',
+                            style: TextStyle(
+                                fontSize: playerScore <= 21 ? 22 : 25,
+                                color: playerScore <= 21
+                                    ? Colors.black
+                                    : Colors.red[900]),
+                          ),
                           SizedBox(
                             height: 20,
+                          ),
+                          // grid view
+                          Container(
+                            height: 300,
+                            child: GridView.builder(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                              ),
+                              // physics: NeverScrollableScrollPhysics(),
+                              itemCount: myCards.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: myCards[index],
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),
                       // buttons
-                      Column(
-                        children: [
-                          MaterialButton(
-                            child: Text('Another Card'),
-                            onPressed: addCard,
-                          ),
-                          MaterialButton(
-                            child: Text('Next Round'),
-                            onPressed: null,
-                          ),
-                        ],
+                      IntrinsicWidth(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            MaterialButton(
+                              child: Text(
+                                'Добавить карту',
+                                style: TextStyle(fontSize: 22),
+                              ),
+                              color: Colors.amber[200],
+                              onPressed: addCard,
+                            ),
+                            MaterialButton(
+                              child: Text(
+                                'Следующий раунд',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              color: Colors.amber[200],
+                              onPressed: () => changeCards(),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -143,6 +277,7 @@ class _BlackJackScreenState extends State<BlackJackScreen> {
                   onPressed: () {
                     changeCards();
                   },
+                  color: Colors.brown[200],
                   child: Text('Start Game'),
                 ),
               ));
