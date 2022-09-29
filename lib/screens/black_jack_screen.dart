@@ -219,10 +219,13 @@ class _BlackJackScreenState extends State<BlackJackScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             MyButton(
-                                onPressed: addCard, label: 'Добавить карту'),
+                                onPressed: addCard,
+                                label: 'Добавить карту',
+                                size: 21),
                             MyButton(
                                 onPressed: changeCards,
-                                label: 'Следующий раунд'),
+                                label: 'Следующий раунд',
+                                size: 21),
                             // MaterialButton(
                             //   child: Text(
                             //     'Добавить карту',
@@ -247,7 +250,21 @@ class _BlackJackScreenState extends State<BlackJackScreen> {
                 ),
               )
             : Center(
-                child: MyButton(onPressed: changeCards, label: 'Start Game'),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Давай ссыграем в БлэкДжек',
+                        style: TextStyle(
+                            fontSize: 25, fontWeight: FontWeight.w900)),
+                    Image.network(
+                        'https://st.depositphotos.com/2112833/5027/i/950/depositphotos_50277667-stock-photo-blackjack-playing-cards.jpg'),
+                    MyButton(
+                      onPressed: changeCards,
+                      label: 'Я готов',
+                      size: 25,
+                    ),
+                  ],
+                ),
                 // MaterialButton(
                 //   onPressed: () {
                 //     changeCards();
